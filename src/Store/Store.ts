@@ -7,7 +7,7 @@ class Store {
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
   tool: Tool | null = null;
-  lineWidth: number = 1;
+  lineWidth: number = 8;
   strokeColor: string = '#000000';
   fillColor: string = '#000000';
   
@@ -40,6 +40,9 @@ class Store {
         this.canvas,
         this.ctx
       );
+
+      this.ctx.strokeStyle = this.strokeColor;
+      this.ctx.fillStyle = this.fillColor;
     }
   }
   
@@ -61,6 +64,14 @@ class Store {
     if (this.ctx){
       this.fillColor = color;
       this.ctx.fillStyle = color;
+    }
+  }
+  
+  clearCanvas() {
+    if (this.canvas && this.ctx) {
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.fillStyle = this.fillColor;
     }
   }
   

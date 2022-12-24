@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import { Outlet } from "react-router";
 import { Canvas } from "./Canvas";
 import { RoomCode } from "./RoomCode";
-import { ToolBar } from "./ToolBar";
+import { TopBar } from "./TopBar";
 import { Users } from "./Users";
 
 const Layout = () => {
@@ -17,7 +17,7 @@ const Layout = () => {
         boxShadow='2px 2px 4px 2px rgb(0, 0, 0, 0.25)'
         mb={8}
       >
-        <ToolBar />
+        <TopBar />
 
         <Canvas />
       </Box>

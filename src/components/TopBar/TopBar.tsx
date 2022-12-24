@@ -10,12 +10,14 @@ import {
   BiRectangle,
   BiUndo,
 } from 'react-icons/bi';
-import { ToolButton } from './ToolButton';
+import { TopBarButton } from './TopBarButton';
 import { ColorPicker } from './ColorPicker';
 import { WidthPicker } from './WidthPicker';
 import Store from 'Store/Store';
+import Brush from 'Tools/Brush';
+import Eraser from 'Tools/Eraser';
 
-const ToolBar = observer(() => {
+const TopBar = observer(() => {
   return (
     <Flex
       borderBottom='3px solid #000'
@@ -24,11 +26,14 @@ const ToolBar = observer(() => {
       justifyContent='space-between'
     >
       <Flex gap={2}>
-        <ToolButton><BsBrush size={24} /></ToolButton>
-        <ToolButton><BsEraser size={24} /></ToolButton>
-        <ToolButton><BsSlashLg size={24} /></ToolButton>
-        <ToolButton><BiRectangle size={24} /></ToolButton>
-        <ToolButton><BsCircle size={24} /></ToolButton>
+        <TopBarButton tool={Brush}><BsBrush size={24} /></TopBarButton>
+        <TopBarButton
+          tool={Eraser}
+          onDoubleClick={() => Store.clearCanvas()}
+        ><BsEraser size={24} /></TopBarButton>
+        <TopBarButton><BsSlashLg size={24} /></TopBarButton>
+        <TopBarButton><BiRectangle size={24} /></TopBarButton>
+        <TopBarButton><BsCircle size={24} /></TopBarButton>
       </Flex>
       <Flex gap={4}>
         <ColorPicker
@@ -42,11 +47,11 @@ const ToolBar = observer(() => {
       </Flex>
       <Flex gap={2}>
         <WidthPicker />
-        <ToolButton><BiUndo size={24} /></ToolButton>
-        <ToolButton><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></ToolButton>
+        <TopBarButton><BiUndo size={24} /></TopBarButton>
+        <TopBarButton><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></TopBarButton>
       </Flex>
     </Flex>
   )
 });
 
-export { ToolBar };
+export { TopBar };

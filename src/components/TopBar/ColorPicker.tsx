@@ -22,7 +22,7 @@ const ColorPicker: React.FC<Props> = (props) => {
       pos='relative'
       alignItems='center'
       boxShadow='2px 2px 3px 1px rgb(0, 0, 0, 0.25)'
-      borderRightRadius={90}
+      borderRadius={90}
       pl={2}
       cursor='pointer'
     >
