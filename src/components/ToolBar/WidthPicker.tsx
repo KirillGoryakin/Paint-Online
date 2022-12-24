@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import {
   Flex,
   NumberDecrementStepper,
@@ -6,19 +7,22 @@ import {
   NumberInputField,
   NumberInputStepper
 } from "@chakra-ui/react";
+import Store from "Store/Store";
 
-const WidthPicker = () => {
+const WidthPicker = observer(() => {
   return (
     <Flex
       as='label'
       alignItems='center'
       gap={2}
     >
-      Width: 
+      Width:
       <NumberInput
-        defaultValue={8}
+        defaultValue={1}
         min={1} max={64}
         allowMouseWheel
+        value={Store.lineWidth}
+        onChange={value => Store.setLineWidth(Number(value))}
         size='sm'
         mr={8}
       >
@@ -30,6 +34,6 @@ const WidthPicker = () => {
       </NumberInput>
     </Flex>
   )
-}
+});
 
 export { WidthPicker };

@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite';
 import { Flex } from '@chakra-ui/react';
 import {
   BsBrush,
@@ -12,8 +13,9 @@ import {
 import { ToolButton } from './ToolButton';
 import { ColorPicker } from './ColorPicker';
 import { WidthPicker } from './WidthPicker';
+import Store from 'Store/Store';
 
-const ToolBar = () => {
+const ToolBar = observer(() => {
   return (
     <Flex
       borderBottom='3px solid #000'
@@ -29,8 +31,14 @@ const ToolBar = () => {
         <ToolButton><BsCircle size={24} /></ToolButton>
       </Flex>
       <Flex gap={4}>
-        <ColorPicker>Stroke Color:</ColorPicker>
-        <ColorPicker>Fill Color:</ColorPicker>
+        <ColorPicker
+          defaultColor={Store.strokeColor}
+          onBlur={Store.setStrokeColor}
+        >Stroke Color:</ColorPicker>
+        <ColorPicker
+          defaultColor={Store.fillColor}
+          onBlur={Store.setFillColor}
+        >Fill Color:</ColorPicker>
       </Flex>
       <Flex gap={2}>
         <WidthPicker />
@@ -39,6 +47,6 @@ const ToolBar = () => {
       </Flex>
     </Flex>
   )
-}
+});
 
 export { ToolBar };

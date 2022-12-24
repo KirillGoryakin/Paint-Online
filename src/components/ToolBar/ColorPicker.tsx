@@ -1,12 +1,20 @@
-import { Box, Flex, Input } from "@chakra-ui/react";
-import { useState } from "react";
+import { Box, Flex, Input } from '@chakra-ui/react';
+import { useState } from 'react';
 
 type Props = {
   children: string;
+  defaultColor: string;
+  onBlur: (color: string) => void;
 };
 
-const ColorPicker: React.FC<Props> = ({ children }) => {
-  const [color, setColor] = useState('#000000');
+const ColorPicker: React.FC<Props> = (props) => {
+  const {
+    children,
+    defaultColor,
+    onBlur,
+  } = props;
+
+  const [color, setColor] = useState(defaultColor);
   
   return (
     <Flex
@@ -23,6 +31,7 @@ const ColorPicker: React.FC<Props> = ({ children }) => {
         type='color'
         value={color}
         onChange={e => setColor(e.target.value)}
+        onBlur={() => onBlur(color)}
         pos='absolute'
         top='50%' left='50%'
         w={0} h={0} p={0} m={0}
@@ -38,6 +47,6 @@ const ColorPicker: React.FC<Props> = ({ children }) => {
       />
     </Flex>
   )
-}
+};
 
 export { ColorPicker };
