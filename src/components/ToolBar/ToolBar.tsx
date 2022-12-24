@@ -11,6 +11,7 @@ import {
 } from 'react-icons/bi';
 import { ToolButton } from './ToolButton';
 import { ColorPicker } from './ColorPicker';
+import { WidthPicker } from './WidthPicker';
 
 const ToolBar = () => {
   return (
@@ -32,6 +33,7 @@ const ToolBar = () => {
         <ColorPicker>Fill Color:</ColorPicker>
       </Flex>
       <Flex gap={2}>
+        <WidthPicker />
         <ToolButton><BiUndo size={24} /></ToolButton>
         <ToolButton><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></ToolButton>
       </Flex>
