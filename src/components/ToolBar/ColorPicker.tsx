@@ -11,28 +11,30 @@ const ColorPicker: React.FC<Props> = ({ children }) => {
   return (
     <Flex
       as='label'
+      pos='relative'
       alignItems='center'
       boxShadow='2px 2px 3px 1px rgb(0, 0, 0, 0.25)'
       borderRightRadius={90}
-      pl={4}
+      pl={2}
       cursor='pointer'
     >
       {children}
-      <Box
-        ml={4}
-        w={24}
-        h={24}
-        background={color}
-        borderRadius={90}
-      />
       <Input
         type='color'
         value={color}
         onChange={e => setColor(e.target.value)}
-        w={0}
-        h={0}
+        pos='absolute'
+        top='50%' left='50%'
+        w={0} h={0} p={0} m={0}
         border={0}
         opacity={0}
+      />
+      <Box
+        ml={2}
+        w={8}
+        h={8}
+        background={color}
+        borderRadius={90}
       />
     </Flex>
   )

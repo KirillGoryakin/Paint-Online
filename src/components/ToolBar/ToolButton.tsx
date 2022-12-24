@@ -11,7 +11,7 @@ const ToolButton: React.FC<Props> = ({ children, onClick = () => {} }) => {
       display='flex'
       onClick={onClick}
       borderRadius={10}
-      p={4}
+      p={1}
       cursor='pointer'
       boxShadow='2px 2px 3px 0px rgb(0, 0, 0, 0.25)'
       transition='box-shadow 0.1s ease-in-out'

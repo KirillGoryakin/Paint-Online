@@ -16,22 +16,22 @@ const ToolBar = () => {
   return (
     <Flex
       borderBottom='3px solid #000'
-      px={24}
-      py={6}
+      px={8}
+      py={2}
       justifyContent='space-between'
     >
-      <Flex gap={8}>
+      <Flex gap={2}>
         <ToolButton><BsBrush size={24} /></ToolButton>
         <ToolButton><BsEraser size={24} /></ToolButton>
         <ToolButton><BsSlashLg size={24} /></ToolButton>
         <ToolButton><BiRectangle size={24} /></ToolButton>
         <ToolButton><BsCircle size={24} /></ToolButton>
       </Flex>
-      <Flex gap={16}>
+      <Flex gap={4}>
         <ColorPicker>Stroke Color:</ColorPicker>
         <ColorPicker>Fill Color:</ColorPicker>
       </Flex>
-      <Flex gap={4}>
+      <Flex gap={2}>
         <ToolButton><BiUndo size={24} /></ToolButton>
         <ToolButton><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></ToolButton>
       </Flex>
