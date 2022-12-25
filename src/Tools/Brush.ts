@@ -3,7 +3,7 @@ import Tool from "./Tool";
 class Brush extends Tool {
 
   onMouseDown(e: MouseEvent) {
-    this.isMouseDown = true;
+    super.onMouseDown(e);
 
     const [x, y, radius] = this.getParams(e);
 
@@ -12,15 +12,13 @@ class Brush extends Tool {
   }
 
   onMouseMove(e: MouseEvent) {
+    super.onMouseMove(e);
+    
     if(this.isMouseDown){
       const [x, y, radius] = this.getParams(e);
 
       this.draw(x, y, radius);
     }
-  }
-
-  onMouseUp(e: MouseEvent) {
-    this.isMouseDown = false;
   }
 
   draw(x: number, y: number, radius: number){

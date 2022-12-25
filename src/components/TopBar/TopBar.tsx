@@ -49,9 +49,9 @@ const TopBar = observer(() => {
         <WidthPicker />
       </Flex>
       <Flex gap={2}>
+        <TopBarButton onClick={Store.undo}><BiUndo size={24} /></TopBarButton>
+        <TopBarButton onClick={Store.redo}><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></TopBarButton>
         <TopBarButton onClick={Store.saveImage}><FaRegSave size={24} /></TopBarButton>
-        <TopBarButton><BiUndo size={24} /></TopBarButton>
-        <TopBarButton><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></TopBarButton>
       </Flex>
     </Flex>
   )

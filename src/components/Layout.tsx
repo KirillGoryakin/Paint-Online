@@ -8,7 +8,7 @@ import { Users } from "./Users";
 const Layout = () => {
   return (
     <Box
-      maxW='1200px'
+      maxW='1206px'
       mx='auto'
       mt={4}
     >

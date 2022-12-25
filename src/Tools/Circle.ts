@@ -6,7 +6,7 @@ class Circle extends Tool {
   startY: number = 0;
 
   onMouseDown(e: MouseEvent) {
-    this.isMouseDown = true;
+    super.onMouseDown(e);
 
     const [x, y] = this.getParams(e);
     this.save = this.canvas.toDataURL();
@@ -18,14 +18,12 @@ class Circle extends Tool {
   }
 
   onMouseMove(e: MouseEvent) {
+    super.onMouseMove(e);
+
     if (this.isMouseDown) {
       const [x, y] = this.getParams(e);
       this.draw(x, y);
     }
-  }
-
-  onMouseUp(e: MouseEvent) {
-    this.isMouseDown = false;
   }
 
   draw(x: number, y: number) {

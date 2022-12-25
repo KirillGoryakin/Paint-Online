@@ -1,3 +1,4 @@
+import Store from "Store/Store";
 
 class Tool {
   canvas: HTMLCanvasElement;
@@ -20,9 +21,16 @@ class Tool {
     this.canvas.onmouseup = this.onMouseUp.bind(this);
   }
 
-  onMouseDown(e: MouseEvent) {}
+  onMouseDown(e: MouseEvent) {
+    this.isMouseDown = true;
+    Store.pushToUndo();
+  }
+
   onMouseMove(e: MouseEvent) {}
-  onMouseUp(e: MouseEvent) {}
+  
+  onMouseUp(e: MouseEvent) {
+    this.isMouseDown = false;
+  }
 
   getParams(e: MouseEvent) {
     const

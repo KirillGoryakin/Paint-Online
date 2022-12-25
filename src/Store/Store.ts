@@ -6,6 +6,8 @@ class Store {
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
   tool: Tool | null = null;
+  undoList: string[] = [];
+  redoList: string[] = [];
   lineWidth: number = 8;
   color: string = '#000000';
   
@@ -14,22 +16,32 @@ class Store {
 
     this.setColor = this.setColor.bind(this);
     this.saveImage = this.saveImage.bind(this);
+    this.undo = this.undo.bind(this);
+    this.redo = this.redo.bind(this);
+    this.pushToUndo = this.pushToUndo.bind(this);
   }
 
   setCanvas(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+    
+    /* Default settings start */
     this.canvas.width = canvas.offsetWidth;
     this.canvas.height = canvas.offsetHeight;
     this.canvas.onselectstart = () => false;
-
+    
     this.ctx = canvas.getContext('2d');
     if (this.ctx){
       this.ctx.lineWidth = this.lineWidth;
       this.ctx.fillStyle = this.color;
       this.ctx.strokeStyle = this.color;
     }
-
+    
     this.setTool(Brush);
+    /* Default settings end */
+  }
+
+  setDefaultSettings() {
+    
   }
 
   setTool(tool: typeof Tool){
@@ -77,6 +89,53 @@ class Store {
       document.body.appendChild(link);
       link.click();
       link.remove();
+    }
+  }
+
+  undo() {
+    if (this.canvas && this.ctx && this.undoList.length){
+      const dataURL = this.undoList.pop();
+      if(dataURL){
+        this.redoList.push(this.canvas.toDataURL());
+
+        const canvas = this.canvas;
+        const ctx = this.ctx;
+
+        const img = new Image();
+        img.src = dataURL;
+        img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+      }
+    } else {
+      this.clearCanvas();
+    }
+  }
+
+  redo() {
+    if (this.canvas && this.ctx && this.redoList.length) {
+      const dataURL = this.redoList.pop();
+      if (dataURL) {
+        this.undoList.push(this.canvas.toDataURL());
+
+        const canvas = this.canvas;
+        const ctx = this.ctx;
+
+        const img = new Image();
+        img.src = dataURL;
+        img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+      }
+    }
+  }
+
+  pushToUndo() {
+    if (this.canvas) {
+      this.undoList.push(this.canvas.toDataURL());
+      this.redoList = [];
     }
   }
 }

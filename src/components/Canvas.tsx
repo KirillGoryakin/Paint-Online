@@ -5,9 +5,18 @@ import Store from 'Store/Store';
 const Canvas = observer(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.ctrlKey && e.code === 'KeyZ') {
+      if(e.shiftKey) Store.redo();
+      else Store.undo();
+    }
+  };
+  
   useEffect(() => {
     if(canvasRef.current)
       Store.setCanvas(canvasRef.current);
+
+    document.addEventListener('keydown', handleKeyDown);
   }, []);
   
   return (
