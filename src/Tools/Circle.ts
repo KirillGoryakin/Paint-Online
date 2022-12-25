@@ -1,0 +1,47 @@
+import Tool from "./Tool";
+
+class Circle extends Tool {
+  save: string = '';
+  startX: number = 0;
+  startY: number = 0;
+
+  onMouseDown(e: MouseEvent) {
+    this.isMouseDown = true;
+
+    const [x, y] = this.getParams(e);
+    this.save = this.canvas.toDataURL();
+    this.startX = x;
+    this.startY = y;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.startX, this.startY);
+  }
+
+  onMouseMove(e: MouseEvent) {
+    if (this.isMouseDown) {
+      const [x, y] = this.getParams(e);
+      this.draw(x, y);
+    }
+  }
+
+  onMouseUp(e: MouseEvent) {
+    this.isMouseDown = false;
+  }
+
+  draw(x: number, y: number) {
+    const img = new Image();
+    img.src = this.save;
+    img.onload = () => {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+
+      this.ctx.beginPath();
+      const radius = Math.sqrt(Math.pow(x - this.startX, 2) + Math.pow(y - this.startY, 2));
+      this.ctx.arc(this.startX, this.startY, radius, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+  }
+
+}
+
+export default Circle;
