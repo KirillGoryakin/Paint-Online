@@ -3,7 +3,6 @@ import Brush from "Tools/Brush";
 import Tool from "Tools/Tool";
 
 class Store {
-
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
   tool: Tool | null = null;
@@ -40,6 +39,7 @@ class Store {
       );
 
       this.ctx.strokeStyle = this.color;
+      this.ctx.fillStyle = this.color;
     }
   }
   

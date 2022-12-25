@@ -20,6 +20,7 @@ import Store from 'Store/Store';
 import Brush from 'Tools/Brush';
 import Eraser from 'Tools/Eraser';
 import Line from 'Tools/Line';
+import Rect from 'Tools/Rect';
 
 const TopBar = observer(() => {
   return (
@@ -36,7 +37,7 @@ const TopBar = observer(() => {
           onDoubleClick={() => Store.clearCanvas()}
         ><BsEraser size={24} /></TopBarButton>
         <TopBarButton tool={Line}><BsSlashLg size={24} /></TopBarButton>
-        <TopBarButton><BiRectangle size={24} /></TopBarButton>
+        <TopBarButton tool={Rect}><BiRectangle size={24} /></TopBarButton>
         <TopBarButton><BsCircle size={24} /></TopBarButton>
       </Flex>
       <Flex gap={4}>
