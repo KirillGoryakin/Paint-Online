@@ -8,14 +8,12 @@ class Store {
   ctx: CanvasRenderingContext2D | null = null;
   tool: Tool | null = null;
   lineWidth: number = 8;
-  strokeColor: string = '#000000';
-  fillColor: string = '#000000';
+  color: string = '#000000';
   
   constructor() {
     makeAutoObservable(this);
 
-    this.setStrokeColor = this.setStrokeColor.bind(this);
-    this.setFillColor = this.setFillColor.bind(this);
+    this.setColor = this.setColor.bind(this);
   }
 
   setCanvas(canvas: HTMLCanvasElement) {
@@ -27,8 +25,8 @@ class Store {
     this.ctx = canvas.getContext('2d');
     if (this.ctx){
       this.ctx.lineWidth = this.lineWidth;
-      this.ctx.fillStyle = this.fillColor;
-      this.ctx.strokeStyle = this.strokeColor;
+      this.ctx.fillStyle = this.color;
+      this.ctx.strokeStyle = this.color;
     }
 
     this.setTool(Brush);
@@ -41,8 +39,7 @@ class Store {
         this.ctx
       );
 
-      this.ctx.strokeStyle = this.strokeColor;
-      this.ctx.fillStyle = this.fillColor;
+      this.ctx.strokeStyle = this.color;
     }
   }
   
@@ -53,25 +50,17 @@ class Store {
     }
   }
 
-  setStrokeColor(color: string) {
+  setColor(color: string) {
     if (this.ctx){
-      this.strokeColor = color;
+      this.color = color;
       this.ctx.strokeStyle = color;
-    }
-  }
-
-  setFillColor(color: string) {
-    if (this.ctx){
-      this.fillColor = color;
       this.ctx.fillStyle = color;
     }
   }
   
   clearCanvas() {
     if (this.canvas && this.ctx) {
-      this.ctx.fillStyle = '#ffffff';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.fillStyle = this.fillColor;
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
   }
   

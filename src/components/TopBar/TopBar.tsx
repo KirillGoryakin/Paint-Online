@@ -10,12 +10,16 @@ import {
   BiRectangle,
   BiUndo,
 } from 'react-icons/bi';
+import {
+  FaRegSave
+} from 'react-icons/fa';
 import { TopBarButton } from './TopBarButton';
 import { ColorPicker } from './ColorPicker';
 import { WidthPicker } from './WidthPicker';
 import Store from 'Store/Store';
 import Brush from 'Tools/Brush';
 import Eraser from 'Tools/Eraser';
+import Line from 'Tools/Line';
 
 const TopBar = observer(() => {
   return (
@@ -31,22 +35,19 @@ const TopBar = observer(() => {
           tool={Eraser}
           onDoubleClick={() => Store.clearCanvas()}
         ><BsEraser size={24} /></TopBarButton>
-        <TopBarButton><BsSlashLg size={24} /></TopBarButton>
+        <TopBarButton tool={Line}><BsSlashLg size={24} /></TopBarButton>
         <TopBarButton><BiRectangle size={24} /></TopBarButton>
         <TopBarButton><BsCircle size={24} /></TopBarButton>
       </Flex>
       <Flex gap={4}>
         <ColorPicker
-          defaultColor={Store.strokeColor}
-          onBlur={Store.setStrokeColor}
-        >Stroke Color:</ColorPicker>
-        <ColorPicker
-          defaultColor={Store.fillColor}
-          onBlur={Store.setFillColor}
-        >Fill Color:</ColorPicker>
+          defaultColor={Store.color}
+          onBlur={Store.setColor}
+        >Color:</ColorPicker>
+        <WidthPicker />
       </Flex>
       <Flex gap={2}>
-        <WidthPicker />
+        <TopBarButton><FaRegSave size={24} /></TopBarButton>
         <TopBarButton><BiUndo size={24} /></TopBarButton>
         <TopBarButton><BiUndo size={24} style={{ transform: 'scaleX(-1)' }} /></TopBarButton>
       </Flex>

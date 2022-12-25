@@ -24,6 +24,7 @@ const ColorPicker: React.FC<Props> = (props) => {
       boxShadow='2px 2px 3px 1px rgb(0, 0, 0, 0.25)'
       borderRadius={90}
       pl={2}
+      userSelect='none'
       cursor='pointer'
     >
       {children}
