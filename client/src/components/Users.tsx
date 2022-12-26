@@ -1,8 +1,8 @@
 import { Text } from "@chakra-ui/react";
+import { observer } from "mobx-react-lite";
+import Store from "Store/Store";
 
-const Users = () => {
-  const users = ['Oleg', 'Vladimir', 'John', 'Marina', 'Natasha', 'Bob'];
-  
+const Users = observer(() => {
   return (
     <div>
       <Text
@@ -12,7 +12,7 @@ const Users = () => {
         color='blue.600'
         mr={1}
       >
-        Users: 
+        Users:
       </Text>
       <Text
         display='inline'
@@ -20,10 +20,10 @@ const Users = () => {
         fontWeight={600}
         color='green.700'
       >
-        {users.join(', ')}
+        {Store.users.join(', ')}
       </Text>
     </div>
-  )
-}
+  );
+});
 
 export { Users };

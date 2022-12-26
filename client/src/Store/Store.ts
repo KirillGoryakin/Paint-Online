@@ -10,6 +10,11 @@ class Store {
   redoList: string[] = [];
   lineWidth: number = 8;
   color: string = '#000000';
+
+  id: string = '';
+  username: string = '';
+  socket: WebSocket | null = null;
+  users: string[] = [];
   
   constructor() {
     makeAutoObservable(this);
@@ -40,8 +45,65 @@ class Store {
     /* Default settings end */
   }
 
-  setDefaultSettings() {
+  setWebsocketConnection(id: string, username: string) {
+    const socket = new WebSocket('ws://localhost:5000/');
+
+    this.socket = socket;
+    this.id = id;
+    this.username = username;
+
+    const msg = { id, username };
+
+    socket.onopen = () => 
+      socket.send(JSON.stringify({ ...msg, method: 'connection' }));
     
+    window.onbeforeunload = () => 
+      socket.send(JSON.stringify({ ...msg, method: 'disconnection' }));
+
+    socket.onmessage = ({ data: msg }) => {
+      msg = JSON.parse(msg);
+
+      switch (msg.method){
+        case 'connection':
+        case 'disconnection':
+          this.users = msg.users;
+          break;
+
+        case 'draw':
+          if (msg.username !== this.username){
+            if (this.canvas && this.ctx) {
+              this.pushToUndo();
+
+              const ctx = this.ctx;
+              const { width, height } = this.canvas;
+              const img = new Image();
+
+              img.src = msg.dataURL;
+              img.onload = () => {
+                ctx.clearRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+              };
+            }
+          }
+          break;
+
+        default:
+          console.log('Unknown message: ', msg);
+          break;
+      }
+    };
+  }
+
+  onDraw() {
+    if (this.canvas && this.socket) {
+      const msg = {
+        method: 'draw',
+        id: this.id,
+        username: this.username,
+        dataURL: this.canvas.toDataURL()
+      };
+      this.socket.send(JSON.stringify(msg));
+    }
   }
 
   setTool(tool: typeof Tool){
@@ -73,7 +135,9 @@ class Store {
   
   clearCanvas() {
     if (this.canvas && this.ctx) {
+      this.pushToUndo();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.onDraw();
     }
   }
 
@@ -93,23 +157,28 @@ class Store {
   }
 
   undo() {
-    if (this.canvas && this.ctx && this.undoList.length){
-      const dataURL = this.undoList.pop();
-      if(dataURL){
-        this.redoList.push(this.canvas.toDataURL());
+    if (this.canvas && this.ctx) {
+      const canvas = this.canvas;
+      const ctx = this.ctx;
+      
+      if (this.undoList.length) {
+        const dataURL = this.undoList.pop();
+        if (dataURL) {
+          this.redoList.push(this.canvas.toDataURL());
 
-        const canvas = this.canvas;
-        const ctx = this.ctx;
+          const img = new Image();
+          img.src = dataURL;
+          img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        const img = new Image();
-        img.src = dataURL;
-        img.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
+            this.onDraw();
+          };
+        }
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.onDraw();
       }
-    } else {
-      this.clearCanvas();
     }
   }
 
@@ -127,6 +196,8 @@ class Store {
         img.onload = () => {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          this.onDraw();
         };
       }
     }

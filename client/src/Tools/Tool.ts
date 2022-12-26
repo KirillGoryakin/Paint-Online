@@ -30,6 +30,7 @@ class Tool {
   
   onMouseUp(e: MouseEvent) {
     this.isMouseDown = false;
+    Store.onDraw();
   }
 
   getParams(e: MouseEvent) {

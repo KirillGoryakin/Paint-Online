@@ -1,6 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { Outlet } from "react-router";
 import { Canvas } from "./Canvas";
+import { ModalWindow } from "./ModalWindow";
 import { RoomCode } from "./RoomCode";
 import { TopBar } from "./TopBar";
 import { Users } from "./Users";
@@ -27,6 +28,8 @@ const Layout = () => {
       <Users />
 
       <Outlet />
+      
+      <ModalWindow />
     </Box>
   )
 }
