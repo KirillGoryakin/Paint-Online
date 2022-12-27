@@ -1,3 +1,4 @@
+import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Line extends Tool {
@@ -27,19 +28,14 @@ class Line extends Tool {
   }
 
   draw(x: number, y: number, radius: number){
-    const img = new Image();
-    img.src = this.save;
-    img.onload = () => {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-
+    Store.drawImage(this.save, () => {
       this.drawCircle(this.startX, this.startY, radius);
 
       this.ctx.lineTo(x, y);
       this.ctx.stroke();
 
       this.drawCircle(x, y, radius);
-    }
+    });
   }
   
   drawCircle(x: number, y: number, radius: number) {

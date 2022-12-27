@@ -45,7 +45,10 @@ class Store {
     /* Default settings end */
   }
 
-  setWebsocketConnection(id: string, username: string) {
+  async setWebsocketConnection(id: string, username: string) { 
+    if(await this.isUsernameTaken(id, username))
+      return false;
+    
     const socket = new WebSocket('ws://localhost:5000/');
 
     this.socket = socket;
@@ -71,20 +74,13 @@ class Store {
 
         case 'draw':
           if (msg.username !== this.username){
-            if (this.canvas && this.ctx) {
-              this.pushToUndo();
-
-              const ctx = this.ctx;
-              const { width, height } = this.canvas;
-              const img = new Image();
-
-              img.src = msg.dataURL;
-              img.onload = () => {
-                ctx.clearRect(0, 0, width, height);
-                ctx.drawImage(img, 0, 0, width, height);
-              };
-            }
+            this.pushToUndo();
+            this.drawImage(msg.dataURL);
           }
+          break;
+
+        case 'roomImage':
+          this.drawImage(msg.dataURL);
           break;
 
         default:
@@ -92,6 +88,17 @@ class Store {
           break;
       }
     };
+
+    return true;
+  }
+
+  async isUsernameTaken(id: string, username: string) {
+    const res = await fetch(`http://localhost:5000/room/${id}`);
+    const data = await res.json();
+    if(data.users.includes(username))
+      return true;
+    
+    return false;
   }
 
   onDraw() {
@@ -141,6 +148,22 @@ class Store {
     }
   }
 
+  drawImage(image: string, cb?: Function) {
+    if(this.canvas && this.ctx){
+      const canvas = this.canvas;
+      const ctx = this.ctx;
+
+      const img = new Image();
+      img.src = image;
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        if(cb) cb();
+      };
+    }
+  }
+
   saveImage() {
     if (this.canvas) {
       const img = this.canvas.toDataURL();
@@ -165,15 +188,7 @@ class Store {
         const dataURL = this.undoList.pop();
         if (dataURL) {
           this.redoList.push(this.canvas.toDataURL());
-
-          const img = new Image();
-          img.src = dataURL;
-          img.onload = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            this.onDraw();
-          };
+          this.drawImage(dataURL, this.onDraw);
         }
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -187,18 +202,7 @@ class Store {
       const dataURL = this.redoList.pop();
       if (dataURL) {
         this.undoList.push(this.canvas.toDataURL());
-
-        const canvas = this.canvas;
-        const ctx = this.ctx;
-
-        const img = new Image();
-        img.src = dataURL;
-        img.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          this.onDraw();
-        };
+        this.drawImage(dataURL, this.onDraw);
       }
     }
   }

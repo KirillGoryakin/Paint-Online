@@ -1,3 +1,4 @@
+import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Rect extends Tool {
@@ -27,14 +28,9 @@ class Rect extends Tool {
   }
 
   draw(x: number, y: number) {
-    const img = new Image();
-    img.src = this.save;
-    img.onload = () => {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-
+    Store.drawImage(this.save, () => {
       this.ctx.fillRect(this.startX, this.startY, x - this.startX, y - this.startY);
-    }
+    });
   }
 
 }
