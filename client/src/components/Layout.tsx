@@ -14,6 +14,7 @@ const Layout = () => {
       mt={4}
     >
       <Box
+        position='relative'
         border='3px solid #000'
         boxShadow='2px 2px 4px 2px rgb(0, 0, 0, 0.25)'
         mb={8}

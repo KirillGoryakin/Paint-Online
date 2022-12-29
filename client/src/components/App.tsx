@@ -11,7 +11,7 @@ const genRoomCode = () => Math.floor(Math.random() * 100000);
 
 const router = createBrowserRouter(createRoutesFromElements(
   <Route path='/' element={<Layout />}>
-    <Route path=":id" />
+    <Route path=":id" element={<></>} />
     <Route index element={<Navigate to={'/' + genRoomCode()} />} />
     <Route path="*" element={<Navigate to={'/' + genRoomCode()} />} />
   </Route>

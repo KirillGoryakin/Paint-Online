@@ -42,10 +42,7 @@ const TopBar = observer(() => {
         <TopBarButton tool={Circle}><BsCircle size={24} /></TopBarButton>
       </Flex>
       <Flex gap={4}>
-        <ColorPicker
-          defaultColor={Store.color}
-          onBlur={Store.setColor}
-        >Color:</ColorPicker>
+        <ColorPicker>Color:</ColorPicker>
         <WidthPicker />
       </Flex>
       <Flex gap={2}>

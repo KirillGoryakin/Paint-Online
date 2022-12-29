@@ -1,15 +1,21 @@
+import { Figure } from "appTypes";
 import { makeAutoObservable } from "mobx";
 import Brush from "Tools/Brush";
+import Circle from "Tools/Circle";
+import Eraser from "Tools/Eraser";
+import Line from "Tools/Line";
+import Rect from "Tools/Rect";
 import Tool from "Tools/Tool";
 
 class Store {
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
   tool: Tool | null = null;
-  undoList: string[] = [];
-  redoList: string[] = [];
+  undoList: Figure[] = [];
+  redoList: Figure[] = [];
   lineWidth: number = 8;
   color: string = '#000000';
+  clickable: boolean = true;
 
   id: string = '';
   username: string = '';
@@ -19,11 +25,11 @@ class Store {
   constructor() {
     makeAutoObservable(this);
 
-    this.setColor = this.setColor.bind(this);
     this.saveImage = this.saveImage.bind(this);
+    this.drawFigure = this.drawFigure.bind(this);
     this.undo = this.undo.bind(this);
     this.redo = this.redo.bind(this);
-    this.pushToUndo = this.pushToUndo.bind(this);
+    this.pushFigureToUndo = this.pushFigureToUndo.bind(this);
   }
 
   setCanvas(canvas: HTMLCanvasElement) {
@@ -69,12 +75,12 @@ class Store {
       switch (msg.method){
         case 'connection':
         case 'disconnection':
-          this.users = msg.users;
+          this.setUsers(msg.users);
           break;
 
         case 'draw':
           if (msg.username !== this.username){
-            this.pushToUndo();
+            // this.pushToUndo();s
             this.drawImage(msg.dataURL);
           }
           break;
@@ -139,12 +145,35 @@ class Store {
       this.ctx.fillStyle = color;
     }
   }
+
+  setClickable(value: boolean) {
+    this.clickable = value;
+  }
+
+  setUsers(users: string[]) {
+    this.users = users;
+  }
   
   clearCanvas() {
     if (this.canvas && this.ctx) {
-      this.pushToUndo();
+      // this.pushToUndo();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.onDraw();
+    }
+  }
+
+  saveImage() {
+    if (this.canvas) {
+      const img = this.canvas.toDataURL();
+      const link = document.createElement('a');
+
+      link.style.display = 'none';
+      link.setAttribute('download', new Date().getTime() + '.png');
+      link.setAttribute('href', img);
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     }
   }
 
@@ -164,18 +193,25 @@ class Store {
     }
   }
 
-  saveImage() {
-    if (this.canvas) {
-      const img = this.canvas.toDataURL();
-      const link = document.createElement('a');
+  getToolFromFigure(figure: Figure): typeof Tool | null {
+    switch (figure.tool) {
+      case 'brush': return Brush;
+      case 'eraser': return Eraser;
+      case 'line': return Line;
+      case 'rect': return Rect;
+      case 'circle': return Circle;
 
-      link.style.display = 'none';
-      link.setAttribute('download', new Date().getTime() + '.png');
-      link.setAttribute('href', img);
+      default: return null;
+    }
+  }
 
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+  drawFigure(figure: Figure) {
+    if (this.ctx) {
+      const ctx = this.ctx;
+      const tool = this.getToolFromFigure(figure);
+
+      ctx.beginPath();
+      if (tool) tool.drawFigure(ctx, figure);
     }
   }
 
@@ -183,35 +219,34 @@ class Store {
     if (this.canvas && this.ctx) {
       const canvas = this.canvas;
       const ctx = this.ctx;
-      
+
       if (this.undoList.length) {
-        const dataURL = this.undoList.pop();
-        if (dataURL) {
-          this.redoList.push(this.canvas.toDataURL());
-          this.drawImage(dataURL, this.onDraw);
+        const figure = this.undoList.pop();
+        if (figure) {
+          this.redoList.push(figure);
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          this.undoList.forEach(this.drawFigure);
         }
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.onDraw();
       }
     }
   }
 
   redo() {
     if (this.canvas && this.ctx && this.redoList.length) {
-      const dataURL = this.redoList.pop();
-      if (dataURL) {
-        this.undoList.push(this.canvas.toDataURL());
-        this.drawImage(dataURL, this.onDraw);
+      const figure = this.redoList.pop();
+      if (figure) {
+        this.undoList.push(figure);
+        this.drawFigure(figure);
       }
     }
   }
 
-  pushToUndo() {
-    if (this.canvas) {
-      this.undoList.push(this.canvas.toDataURL());
-      this.redoList = [];
-    }
+  pushFigureToUndo(figure: Figure){
+    this.undoList.push(figure);
+    this.redoList = [];
   }
 }
 

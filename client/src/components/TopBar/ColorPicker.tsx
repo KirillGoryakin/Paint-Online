@@ -1,21 +1,20 @@
 import { Box, Flex, Input } from '@chakra-ui/react';
+import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
+import Store from 'Store/Store';
 
 type Props = {
   children: string;
-  defaultColor: string;
-  onBlur: (color: string) => void;
 };
 
-const ColorPicker: React.FC<Props> = (props) => {
-  const {
-    children,
-    defaultColor,
-    onBlur,
-  } = props;
+const ColorPicker: React.FC<Props> = observer(({ children }) => {
+  const [color, setColor] = useState(Store.color);
 
-  const [color, setColor] = useState(defaultColor);
-  
+  const handleBlur = () => {
+    Store.setColor(color);
+    Store.setClickable(true);
+  } 
+
   return (
     <Flex
       as='label'
@@ -32,7 +31,8 @@ const ColorPicker: React.FC<Props> = (props) => {
         type='color'
         value={color}
         onChange={e => setColor(e.target.value)}
-        onBlur={() => onBlur(color)}
+        onFocus={() => Store.setClickable(false)}
+        onBlur={handleBlur}
         pos='absolute'
         top='50%' left='50%'
         w={0} h={0} p={0} m={0}
@@ -48,6 +48,6 @@ const ColorPicker: React.FC<Props> = (props) => {
       />
     </Flex>
   )
-};
+});
 
 export { ColorPicker };

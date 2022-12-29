@@ -20,10 +20,12 @@ const WidthPicker = observer(() => {
       Width:
       <NumberInput
         defaultValue={1}
-        min={1} max={64}
+        min={1} max={256}
         allowMouseWheel
         value={Store.lineWidth}
         onChange={value => Store.setLineWidth(Number(value))}
+        onFocus={() => Store.setClickable(false)}
+        onBlur={() => Store.setClickable(true)}
         size='sm'
       >
         <NumberInputField w={20} />

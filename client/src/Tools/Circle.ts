@@ -1,41 +1,75 @@
+import { Figure } from "appTypes";
 import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Circle extends Tool {
+  figureToUndo: Figure & { tool: 'circle' } = {
+    tool: 'circle',
+    color: '',
+    lineWidth: 0,
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+  };
+  
   save: string = '';
-  startX: number = 0;
-  startY: number = 0;
 
   onMouseDown(e: MouseEvent) {
     super.onMouseDown(e);
 
-    const [x, y] = this.getParams(e);
+    const [x, y] = this.getCoords(e);
     this.save = this.canvas.toDataURL();
-    this.startX = x;
-    this.startY = y;
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.startX, this.startY);
+    this.figureToUndo = {
+      ...this.figureToUndo,
+      startX: x,
+      startY: y,
+    };
   }
 
   onMouseMove(e: MouseEvent) {
     super.onMouseMove(e);
 
     if (this.isMouseDown) {
-      const [x, y] = this.getParams(e);
+      const [x, y] = this.getCoords(e);
+
+      this.figureToUndo = {
+        ...this.figureToUndo,
+        endX: x,
+        endY: y,
+      };
+
       this.draw(x, y);
     }
   }
 
   draw(x: number, y: number) {
-    Store.drawImage(this.save, () => {
-      this.ctx.beginPath();
-      const radius = Math.sqrt(Math.pow(x - this.startX, 2) + Math.pow(y - this.startY, 2));
-      this.ctx.arc(this.startX, this.startY, radius, 0, Math.PI * 2);
-      this.ctx.fill();
-    });
+    const figure: Figure & { tool: 'circle' } = {
+      ...this.figureToUndo,
+      endX: x,
+      endY: y,
+    };
+
+    Store.drawImage(this.save, () =>
+      Circle.drawFigure(this.ctx, figure));
   }
 
+  static drawFigure(
+    ctx: CanvasRenderingContext2D,
+    figure: Figure & { tool: 'circle' }
+  ) {
+    ctx.strokeStyle = figure.color;
+    ctx.fillStyle = figure.color;
+    ctx.lineWidth = figure.lineWidth;
+
+    const { startX, startY, endX, endY } = figure;
+    
+    ctx.beginPath();
+    const radius = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+    ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 export default Circle;

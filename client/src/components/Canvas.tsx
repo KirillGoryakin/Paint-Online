@@ -20,15 +20,28 @@ const Canvas = observer(() => {
   }, []);
   
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        width: '100%',
-        height: '650px'
-      }}
-    >
-      Your browser does not support HTML canvas.
-    </canvas>
+    <>
+      <div
+        style={{
+          display: Store.clickable ? 'none' : 'block',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: '650px',
+          opacity: 0,
+        }}
+      />
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: '650px',
+        }}
+      >
+        Your browser does not support HTML canvas.
+      </canvas>
+    </>
   )
 });
 

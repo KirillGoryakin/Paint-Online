@@ -1,11 +1,13 @@
 import { Flex, Heading } from '@chakra-ui/react';
 import { useParams } from 'react-router';
 import { FiLink } from 'react-icons/fi';
+import Store from 'Store/Store';
+import { observer } from 'mobx-react-lite';
 
-const RoomCode = () => {
+const RoomCode = observer(() => {
   const params = useParams();
-  
-  return (
+
+  return Store.socket ? (
     <Flex
       alignItems='center'
       justifyContent='space-between'
@@ -31,7 +33,7 @@ const RoomCode = () => {
         Copy Link <FiLink />
       </Heading>
     </Flex>
-  )
-}
+  ) : null;
+});
 
 export { RoomCode };

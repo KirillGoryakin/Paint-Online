@@ -1,38 +1,75 @@
+import { Figure } from "appTypes";
 import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Rect extends Tool {
+  figureToUndo: Figure & { tool: 'rect' } = {
+    tool: 'rect',
+    color: '',
+    lineWidth: 0,
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+  };
+  
   save: string = '';
-  startX: number = 0;
-  startY: number = 0;
 
   onMouseDown(e: MouseEvent) {
     super.onMouseDown(e);
 
-    const [x, y] = this.getParams(e);
+    const [x, y] = this.getCoords(e);
     this.save = this.canvas.toDataURL();
-    this.startX = x;
-    this.startY = y;
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.startX, this.startY);
+    this.figureToUndo = {
+      ...this.figureToUndo,
+      startX: x,
+      startY: y,
+    };
   }
 
   onMouseMove(e: MouseEvent) {
     super.onMouseMove(e);
     
     if (this.isMouseDown) {
-      const [x, y] = this.getParams(e);
+      const [x, y] = this.getCoords(e);
+
+      this.figureToUndo = {
+        ...this.figureToUndo,
+        endX: x,
+        endY: y,
+      };
+      
       this.draw(x, y);
     }
   }
 
   draw(x: number, y: number) {
-    Store.drawImage(this.save, () => {
-      this.ctx.fillRect(this.startX, this.startY, x - this.startX, y - this.startY);
-    });
+    const figure: Figure & { tool: 'rect' } = {
+      ...this.figureToUndo,
+      endX: x,
+      endY: y,
+    };
+
+    Store.drawImage(this.save, () => 
+      Rect.drawFigure(this.ctx, figure));
   }
 
+  static drawFigure(
+    ctx: CanvasRenderingContext2D,
+    figure: Figure & { tool: 'rect' }
+  ) {
+    ctx.strokeStyle = figure.color;
+    ctx.fillStyle = figure.color;
+    ctx.lineWidth = figure.lineWidth;
+
+    const
+      { startX, startY, endX, endY } = figure,
+      w = endX - startX,
+      h = endY - startY;
+
+    ctx.fillRect(startX, startY, w, h)
+  }
 }
 
 export default Rect;

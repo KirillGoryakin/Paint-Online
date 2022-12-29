@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import Store from "Store/Store";
 
 const Users = observer(() => {
-  return (
+  return Store.socket ? (
     <div>
       <Text
         display='inline'
@@ -23,7 +23,7 @@ const Users = observer(() => {
         {Store.users.join(', ')}
       </Text>
     </div>
-  );
+  ) : null;
 });
 
 export { Users };
