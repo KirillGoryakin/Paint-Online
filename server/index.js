@@ -9,7 +9,7 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 5000;
 
-let rooms = []; //[{ id: number, img: string, users: string[] }, ...]
+let rooms = []; //[{ id: number, users: string[], figures: Figure[] }, ...]
 
 app.ws('/', (ws, req) => {
   console.log('A user connected!');
@@ -20,7 +20,8 @@ app.ws('/', (ws, req) => {
     switch (msg.method) {
       case 'connection': handleConnection(ws, msg); break;
       case 'disconnection': handleDisconnection(ws, msg); break;
-      case 'draw': handleDraw(ws, msg); break;
+      case 'figure': handleFigure(ws, msg); break;
+      case 'undo': handleUndo(ws, msg); break;
     }
   });
 });
@@ -42,6 +43,8 @@ app.get('/room/:roomId', (req, res) => {
 app.listen(PORT, () => console.log(`Server started on port: ${PORT}.`));
 
 const sendToUser = (id, username, msg) => {
+  msg = { ...msg, id, username };
+  
   aWss.clients.forEach(client => {
     if (client.id === id & client.username === username) {
       client.send(JSON.stringify(msg));
@@ -65,11 +68,11 @@ const handleConnection = (ws, msg) => {
   if (room) {
     room.users.push(msg.username);
     sendToAllUsersInRoom({ ...msg, users: room.users });
-    sendToUser(msg.id, msg.username, { method: 'roomImage', dataURL: room.img });
+    sendToUser(msg.id, msg.username, { method: 'init', figures: room.figures });
   } else {
     const newRoom = {
       id: msg.id,
-      img: '',
+      figures: [],
       users: [msg.username]
     };
     rooms.push(newRoom);
@@ -79,7 +82,6 @@ const handleConnection = (ws, msg) => {
 
 const handleDisconnection = (ws, msg) => {
   console.log('A user has disconnected!');
-  ws.id = msg.id;
 
   const room = rooms.find(({ id }) => id === msg.id);
   if(room){
@@ -92,12 +94,17 @@ const handleDisconnection = (ws, msg) => {
   }
 };
 
-const handleDraw = (ws, msg) => {
-  ws.id = msg.id;
-
+const handleFigure = (ws, msg) => {
   const room = rooms.find(({ id }) => id === msg.id);
   if (room)
-    room.img = msg.dataURL;
+    room.figures.push(msg.figure);
+
+  sendToAllUsersInRoom(msg);
+};
+
+const handleUndo = (ws, msg) => {
+  const room = rooms.find(({ id }) => id === msg.id);
+  if (room) room.figures.pop();
 
   sendToAllUsersInRoom(msg);
 };

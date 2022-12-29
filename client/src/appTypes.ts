@@ -13,4 +13,9 @@ interface FigureDrag extends CommonFigure {
   endX: number;
   endY: number;
 };
-export type Figure = FigureBrush | FigureDrag;
+interface FigureClear extends CommonFigure {
+  tool: 'clear';
+  w: number;
+  h: number;
+};
+export type Figure = FigureBrush | FigureDrag | FigureClear;

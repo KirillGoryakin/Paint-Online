@@ -2,6 +2,7 @@ import { Figure } from "appTypes";
 import { makeAutoObservable } from "mobx";
 import Brush from "Tools/Brush";
 import Circle from "Tools/Circle";
+import Clear from "Tools/Clear";
 import Eraser from "Tools/Eraser";
 import Line from "Tools/Line";
 import Rect from "Tools/Rect";
@@ -34,8 +35,7 @@ class Store {
 
   setCanvas(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    
-    /* Default settings start */
+
     this.canvas.width = canvas.offsetWidth;
     this.canvas.height = canvas.offsetHeight;
     this.canvas.onselectstart = () => false;
@@ -48,13 +48,9 @@ class Store {
     }
     
     this.setTool(Brush);
-    /* Default settings end */
   }
 
-  async setWebsocketConnection(id: string, username: string) { 
-    if(await this.isUsernameTaken(id, username))
-      return false;
-    
+  setWebsocketConnection(id: string, username: string) {
     const socket = new WebSocket('ws://localhost:5000/');
 
     this.socket = socket;
@@ -78,15 +74,24 @@ class Store {
           this.setUsers(msg.users);
           break;
 
-        case 'draw':
+        case 'init':
+          msg.figures.forEach((figure: Figure) => {
+            this.pushFigureToUndo(figure);
+            this.drawFigure(figure);
+          });
+          break;
+
+        case 'figure':
           if (msg.username !== this.username){
-            // this.pushToUndo();s
-            this.drawImage(msg.dataURL);
+            this.pushFigureToUndo(msg.figure);
+            this.drawFigure(msg.figure);
           }
           break;
 
-        case 'roomImage':
-          this.drawImage(msg.dataURL);
+        case 'undo':
+          if (msg.username !== this.username) {
+            this.undo(false);
+          }
           break;
 
         default:
@@ -94,8 +99,6 @@ class Store {
           break;
       }
     };
-
-    return true;
   }
 
   async isUsernameTaken(id: string, username: string) {
@@ -107,16 +110,26 @@ class Store {
     return false;
   }
 
-  onDraw() {
-    if (this.canvas && this.socket) {
-      const msg = {
-        method: 'draw',
+  sendMessage(msg: object) {
+    if (this.socket) {
+      msg = {
         id: this.id,
         username: this.username,
-        dataURL: this.canvas.toDataURL()
+        ...msg,
       };
       this.socket.send(JSON.stringify(msg));
     }
+  }
+
+  sendFigure(figure: Figure) {
+    this.sendMessage({
+      method: 'figure',
+      figure,
+    });
+  }
+
+  sendUndo(){
+    this.sendMessage({ method: 'undo' });
   }
 
   setTool(tool: typeof Tool){
@@ -156,9 +169,19 @@ class Store {
   
   clearCanvas() {
     if (this.canvas && this.ctx) {
-      // this.pushToUndo();
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.onDraw();
+      const { width: w, height: h } = this.canvas;
+      const ctx = this.ctx;
+      
+      const figure: Figure & { tool: 'clear' } = {
+        tool: 'clear',
+        color: '',
+        lineWidth: 0,
+        w, h
+      };
+
+      Clear.drawFigure(ctx, figure);
+      this.pushFigureToUndo(figure);
+      this.sendFigure(figure);
     }
   }
 
@@ -200,6 +223,7 @@ class Store {
       case 'line': return Line;
       case 'rect': return Rect;
       case 'circle': return Circle;
+      case 'clear': return Clear;
 
       default: return null;
     }
@@ -215,7 +239,7 @@ class Store {
     }
   }
 
-  undo() {
+  undo(doSend: boolean = true) {
     if (this.canvas && this.ctx) {
       const canvas = this.canvas;
       const ctx = this.ctx;
@@ -231,6 +255,8 @@ class Store {
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
+
+      if(doSend) this.sendUndo();
     }
   }
 
@@ -240,6 +266,7 @@ class Store {
       if (figure) {
         this.undoList.push(figure);
         this.drawFigure(figure);
+        this.sendFigure(figure);
       }
     }
   }

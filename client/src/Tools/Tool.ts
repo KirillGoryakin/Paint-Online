@@ -38,8 +38,10 @@ class Tool {
   onMouseMove(e: MouseEvent) {}
   
   onMouseUp(e: MouseEvent) {
-    if (this.isMouseDown && this.figureToUndo)
+    if (this.isMouseDown && this.figureToUndo){
+      Store.sendFigure(this.figureToUndo);
       Store.pushFigureToUndo(this.figureToUndo);
+    }
 
     this.isMouseDown = false;
   }
