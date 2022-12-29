@@ -1,5 +1,5 @@
 {
-  "name": "paint-online",
+  "name": "paint-online-client",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

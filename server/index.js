@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 let rooms = []; //[{ id: number, users: string[], figures: Figure[] }, ...]
 
 app.ws('/', (ws, req) => {
-  console.log('A user connected!');
+  console.log(`A user has connected! (${new Date().toGMTString()})`);
   
   ws.on('message', (msg) => {
     msg = JSON.parse(msg);
@@ -81,7 +81,7 @@ const handleConnection = (ws, msg) => {
 };
 
 const handleDisconnection = (ws, msg) => {
-  console.log('A user has disconnected!');
+  console.log(`A user has disconnected! (${new Date().toGMTString()})`);
 
   const room = rooms.find(({ id }) => id === msg.id);
   if(room){
