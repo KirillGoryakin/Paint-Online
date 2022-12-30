@@ -34,6 +34,13 @@ Install packages:
 ```
 npm i
 ```
+If the server cannot be reached from client you'll see and error message, but you still will be able to continue offline.
+
+Client doesn't have links to the server. Provide them with ENV variables. If you are in developing mod, you can just create a `.env.local` file in `/client/` folder and write this:
+```
+REACT_APP_HTTP_URL=http://localhost:5000
+REACT_APP_WS_URL=ws://localhost:5000
+```
 ### Start client and server:
 ```
 npm run start
