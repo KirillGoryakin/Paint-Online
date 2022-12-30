@@ -1,6 +1,7 @@
 interface CommonFigure {
   color: string;
   lineWidth: number;
+  pending?: boolean;
 };
 interface FigureBrush extends CommonFigure {
   tool: 'brush' | 'eraser';

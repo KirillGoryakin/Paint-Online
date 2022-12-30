@@ -22,6 +22,7 @@ class Store {
   username: string = '';
   socket: WebSocket | null = null;
   users: string[] = [];
+  isPending: boolean = false;
   
   constructor() {
     makeAutoObservable(this);
@@ -51,7 +52,7 @@ class Store {
   }
 
   setWebsocketConnection(id: string, username: string) {
-    const socket = new WebSocket('ws://localhost:5000/');
+    const socket = new WebSocket(`${process.env.REACT_APP_WS_URL}/`);
 
     this.socket = socket;
     this.id = id;
@@ -83,7 +84,13 @@ class Store {
 
         case 'figure':
           if (msg.username !== this.username){
-            this.pushFigureToUndo(msg.figure);
+            if (msg.figure.pending){
+              this.setPending(true);
+            } else {
+              this.pushFigureToUndo(msg.figure);
+              this.setPending(false);
+            }
+
             this.drawFigure(msg.figure);
           }
           break;
@@ -102,7 +109,7 @@ class Store {
   }
 
   async isUsernameTaken(id: string, username: string) {
-    const res = await fetch(`http://localhost:5000/room/${id}`);
+    const res = await fetch(`${process.env.REACT_APP_HTTP_URL}/room/${id}`);
     const data = await res.json();
     if(data.users.includes(username))
       return true;
@@ -165,6 +172,16 @@ class Store {
 
   setUsers(users: string[]) {
     this.users = users;
+  }
+
+  setPending(value: boolean) {
+    if (this.isPending && !value)
+      this.updateCanvas();
+
+    if (!this.isPending && value)
+      this.ctx?.beginPath();
+
+    this.isPending = value;
   }
   
   clearCanvas() {
@@ -234,8 +251,18 @@ class Store {
       const ctx = this.ctx;
       const tool = this.getToolFromFigure(figure);
 
-      ctx.beginPath();
+      if (!figure.pending) ctx.beginPath();
       if (tool) tool.drawFigure(ctx, figure);
+    }
+  }
+
+  updateCanvas() {
+    if (this.canvas && this.ctx) {
+      const canvas = this.canvas;
+      const ctx = this.ctx;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.undoList.forEach(this.drawFigure);
     }
   }
 
@@ -243,14 +270,13 @@ class Store {
     if (this.canvas && this.ctx) {
       const canvas = this.canvas;
       const ctx = this.ctx;
-
+      
       if (this.undoList.length) {
         const figure = this.undoList.pop();
         if (figure) {
           this.redoList.push(figure);
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          this.undoList.forEach(this.drawFigure);
+          this.updateCanvas();
         }
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);

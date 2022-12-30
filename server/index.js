@@ -96,10 +96,12 @@ const handleDisconnection = (ws, msg) => {
 
 const handleFigure = (ws, msg) => {
   const room = rooms.find(({ id }) => id === msg.id);
-  if (room)
-    room.figures.push(msg.figure);
+  if (room){
+    if (!msg.figure.pending)
+      room.figures.push(msg.figure);
 
-  sendToAllUsersInRoom(msg);
+    sendToAllUsersInRoom(msg);
+  }
 };
 
 const handleUndo = (ws, msg) => {

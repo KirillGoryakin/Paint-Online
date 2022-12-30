@@ -34,6 +34,7 @@ class Eraser extends Tool {
     };
 
     Eraser.drawFigure(this.ctx, figure);
+    Store.sendFigure({ ...figure, pending: true });
   }
 
   static drawFigure(

@@ -34,6 +34,7 @@ class Brush extends Tool {
     };
     
     Brush.drawFigure(this.ctx, figure);
+    Store.sendFigure({ ...figure, pending: true });
   }
 
   static drawFigure(
