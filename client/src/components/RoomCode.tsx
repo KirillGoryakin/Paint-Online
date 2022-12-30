@@ -17,7 +17,7 @@ const RoomCode = observer(() => {
         size='2xl'
         color='red.500'
       >
-        Room Code: {params?.id || ''}
+        Room ID: {params?.id || ''}
       </Heading>
 
       <Heading

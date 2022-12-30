@@ -12,8 +12,6 @@ const PORT = process.env.PORT || 5000;
 let rooms = []; //[{ id: number, users: string[], figures: Figure[] }, ...]
 
 app.ws('/', (ws, req) => {
-  console.log(`A user has connected! (${new Date().toGMTString()})`);
-  
   ws.on('message', (msg) => {
     msg = JSON.parse(msg);
 
@@ -61,6 +59,8 @@ const sendToAllUsersInRoom = (msg) => {
 };
 
 const handleConnection = (ws, msg) => {
+  console.log(`${msg.username} has connected to {${msg.id}}! (${new Date().toGMTString()})`);
+
   ws.id = msg.id;
   ws.username = msg.username;
 
@@ -81,7 +81,7 @@ const handleConnection = (ws, msg) => {
 };
 
 const handleDisconnection = (ws, msg) => {
-  console.log(`A user has disconnected! (${new Date().toGMTString()})`);
+  console.log(`${msg.username} has disconnected from {${msg.id}}! (${new Date().toGMTString()})`);
 
   const room = rooms.find(({ id }) => id === msg.id);
   if(room){

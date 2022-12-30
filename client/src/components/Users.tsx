@@ -4,7 +4,7 @@ import Store from "Store/Store";
 
 const Users = observer(() => {
   return Store.socket ? (
-    <div>
+    <div style={{ marginBottom: '1rem' }}>
       <Text
         display='inline'
         fontSize={28}
