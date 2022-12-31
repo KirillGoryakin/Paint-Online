@@ -20,3 +20,8 @@ ul {
   margin: 0;
 }
 /* normalize css ends here */
+
+@font-face {
+  font-family: 'Comic Sans';
+  src: url('../fonts/ComicSansMS/Comic Sans MS.ttf') format('truetype');
+}

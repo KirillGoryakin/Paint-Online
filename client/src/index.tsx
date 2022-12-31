@@ -6,8 +6,8 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 
 const theme = extendTheme({
   fonts: {
-    heading: `cursive, sans-serif`,
-    body: `cursive, sans-serif`,
+    heading: `'Comic Sans', sans-serif`,
+    body: `'Comic Sans', sans-serif`,
   },
 })
 
