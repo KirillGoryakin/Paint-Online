@@ -15,7 +15,7 @@ class Circle extends Tool {
   
   save: string = '';
 
-  onMouseDown(e: MouseEvent) {
+  onMouseDown(e: PointerEvent) {
     super.onMouseDown(e);
 
     const [x, y] = this.getCoords(e);
@@ -28,7 +28,7 @@ class Circle extends Tool {
     };
   }
 
-  onMouseMove(e: MouseEvent) {
+  onMouseMove(e: PointerEvent) {
     super.onMouseMove(e);
 
     if (this.isMouseDown) {

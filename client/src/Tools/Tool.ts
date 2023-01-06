@@ -19,15 +19,12 @@ class Tool {
   }
 
   setEvents() {
-    this.canvas.onmousedown = this.onMouseDown.bind(this);
-    this.canvas.onmousemove = this.onMouseMove.bind(this);
-    this.canvas.onmouseup = this.onMouseUp.bind(this);
-
     this.canvas.onpointerdown = this.onMouseDown.bind(this);
-    this.canvas.onpointermove = this.onPointerMove.bind(this);
+    this.canvas.onpointermove = this.onMouseMove.bind(this);
+    this.canvas.onmouseup = this.onMouseUp.bind(this);
   }
 
-  onMouseDown(e: MouseEvent) {
+  onMouseDown(e: PointerEvent) {
     this.isMouseDown = true;
     
     if (this.figureToUndo){
@@ -38,7 +35,9 @@ class Tool {
     this.ctx.beginPath();
   }
 
-  onMouseMove(e: MouseEvent, pressure?: number) {}
+  onMouseMove(e: PointerEvent) {
+    if (e.pressure === 0) this.onMouseUp(e);
+  }
   
   onMouseUp(e: MouseEvent) {
     if (this.isMouseDown && this.figureToUndo){
@@ -47,11 +46,6 @@ class Tool {
     }
 
     this.isMouseDown = false;
-  }
-
-  onPointerMove(e: PointerEvent) {
-    if(e.pressure > 0) this.onMouseMove(e, e.pressure);
-    else this.onMouseUp(e);
   }
 
   static drawFigure(

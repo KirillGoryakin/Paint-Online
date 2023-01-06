@@ -10,22 +10,24 @@ class Eraser extends Tool {
     coords: [],
   };
 
-  onMouseDown(e: MouseEvent) {
+  onMouseDown(e: PointerEvent) {
     super.onMouseDown(e);
     this.figureToUndo.coords = [];
   }
 
-  onMouseMove(e: MouseEvent, pressure: number) {
+  onMouseMove(e: PointerEvent) {
     super.onMouseMove(e);
 
     if (this.isMouseDown) {
       const [x, y] = this.getCoords(e);
+      const pressure = e.pointerType === 'mouse' ? undefined : e.pressure + 0.5;
+      
       this.figureToUndo.coords.push({ x, y, pressure });
       this.draw(x, y, pressure);
     }
   }
 
-  draw(x: number, y: number, pressure: number){
+  draw(x: number, y: number, pressure?: number){
     const figure: Figure & { tool: 'eraser' } = {
       ...this.figureToUndo,
       coords: [{ x, y, pressure }],
