@@ -22,6 +22,9 @@ class Tool {
     this.canvas.onmousedown = this.onMouseDown.bind(this);
     this.canvas.onmousemove = this.onMouseMove.bind(this);
     this.canvas.onmouseup = this.onMouseUp.bind(this);
+
+    this.canvas.onpointerdown = this.onMouseDown.bind(this);
+    this.canvas.onpointermove = this.onPointerMove.bind(this);
   }
 
   onMouseDown(e: MouseEvent) {
@@ -44,6 +47,11 @@ class Tool {
     }
 
     this.isMouseDown = false;
+  }
+
+  onPointerMove(e: PointerEvent) {
+    if(e.pressure > 0) this.onMouseMove(e);
+    else this.onMouseUp(e);
   }
 
   static drawFigure(

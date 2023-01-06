@@ -37,6 +37,7 @@ const Canvas = observer(() => {
         style={{
           width: '100%',
           height: '650px',
+          touchAction: 'none',
         }}
       >
         Your browser does not support HTML canvas.
