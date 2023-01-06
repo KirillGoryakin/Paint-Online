@@ -15,22 +15,20 @@ class Brush extends Tool {
     this.figureToUndo.coords = [];
   }
   
-  onMouseMove(e: MouseEvent) {
+  onMouseMove(e: MouseEvent, pressure: number) {
     super.onMouseMove(e);
     
     if(this.isMouseDown){
       const [x, y] = this.getCoords(e);
-      this.figureToUndo.coords.push({x, y});
-      this.draw(x, y);
+      this.figureToUndo.coords.push({x, y, pressure});
+      this.draw(x, y, pressure);
     }
   }
 
-  draw(x: number, y: number){
+  draw(x: number, y: number, pressure?: number){
     const figure: Figure & { tool: 'brush' } = {
-      tool: 'brush',
-      color: Store.color,
-      lineWidth: Store.lineWidth,
-      coords: [{ x, y }]
+      ...this.figureToUndo,
+      coords: [{ x, y, pressure }],
     };
     
     Brush.drawFigure(this.ctx, figure);
@@ -45,7 +43,10 @@ class Brush extends Tool {
     ctx.fillStyle = figure.color;
     ctx.lineWidth = figure.lineWidth;
 
-    figure.coords.forEach(({x, y}) => {
+    figure.coords.forEach(({x, y, pressure}) => {
+      if(pressure)
+        ctx.lineWidth = figure.lineWidth * pressure;
+      
       ctx.lineTo(x, y);
       ctx.stroke();
 
@@ -55,6 +56,8 @@ class Brush extends Tool {
 
       ctx.beginPath();
       ctx.moveTo(x, y);
+
+      ctx.lineWidth = figure.lineWidth;
     });
   }
 }

@@ -38,7 +38,7 @@ class Tool {
     this.ctx.beginPath();
   }
 
-  onMouseMove(e: MouseEvent) {}
+  onMouseMove(e: MouseEvent, pressure?: number) {}
   
   onMouseUp(e: MouseEvent) {
     if (this.isMouseDown && this.figureToUndo){
@@ -50,7 +50,7 @@ class Tool {
   }
 
   onPointerMove(e: PointerEvent) {
-    if(e.pressure > 0) this.onMouseMove(e);
+    if(e.pressure > 0) this.onMouseMove(e, e.pressure);
     else this.onMouseUp(e);
   }
 

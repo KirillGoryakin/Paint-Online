@@ -15,22 +15,20 @@ class Eraser extends Tool {
     this.figureToUndo.coords = [];
   }
 
-  onMouseMove(e: MouseEvent) {
+  onMouseMove(e: MouseEvent, pressure: number) {
     super.onMouseMove(e);
 
     if (this.isMouseDown) {
       const [x, y] = this.getCoords(e);
-      this.figureToUndo.coords.push({ x, y });
-      this.draw(x, y);
+      this.figureToUndo.coords.push({ x, y, pressure });
+      this.draw(x, y, pressure);
     }
   }
 
-  draw(x: number, y: number){
+  draw(x: number, y: number, pressure: number){
     const figure: Figure & { tool: 'eraser' } = {
-      tool: 'eraser',
-      color: Store.color,
-      lineWidth: Store.lineWidth,
-      coords: [{ x, y }]
+      ...this.figureToUndo,
+      coords: [{ x, y, pressure }],
     };
 
     Eraser.drawFigure(this.ctx, figure);
@@ -46,7 +44,10 @@ class Eraser extends Tool {
     ctx.lineWidth = figure.lineWidth;
     ctx.globalCompositeOperation = "destination-out";
 
-    figure.coords.forEach(({ x, y }) => {
+    figure.coords.forEach(({ x, y, pressure }) => {
+      if (pressure)
+        ctx.lineWidth = figure.lineWidth * pressure;
+      
       ctx.lineTo(x, y);
       ctx.stroke();
 
@@ -56,6 +57,8 @@ class Eraser extends Tool {
 
       ctx.beginPath();
       ctx.moveTo(x, y);
+
+      ctx.lineWidth = figure.lineWidth;
     });
     
     ctx.globalCompositeOperation = "source-over";

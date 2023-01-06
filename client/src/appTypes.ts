@@ -5,7 +5,7 @@ interface CommonFigure {
 };
 interface FigureBrush extends CommonFigure {
   tool: 'brush' | 'eraser';
-  coords: {x: number; y: number;}[];
+  coords: {x: number; y: number; pressure?: number}[];
 };
 interface FigureDrag extends CommonFigure {
   tool: 'line' | 'rect' | 'circle';
