@@ -103,6 +103,19 @@ class Store {
           break;
       }
     };
+
+    if (
+      process.env.REACT_APP_DO_RECONNECT
+      && process.env.REACT_APP_RECONNECT_TIMEOUT
+    ){
+      setTimeout(
+        () => {
+          socket.close();
+          this.setWebsocketConnection(roomId, username)
+        },
+        Number(process.env.REACT_APP_RECONNECT_TIMEOUT)
+      );
+    }
   }
 
   async isUsernameTaken(roomId: string, username: string) {
