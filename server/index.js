@@ -78,7 +78,7 @@ const sendToAllUsersInRoom = (roomId, msg) => {
 };
 
 const handleConnection = (ws, msg) => {
-  console.log(`${msg.username} has connected to {${msg.roomId}}! (${new Date().toGMTString()})`);
+  console.log(`${msg.username} has connected to ${msg.roomId}! (${new Date().toGMTString()})`);
 
   ws.roomId = msg.roomId;
   ws.username = msg.username;
@@ -101,7 +101,7 @@ const handleConnection = (ws, msg) => {
 };
 
 const handleDisconnection = (ws) => {
-  console.log(`${ws.username} has disconnected from {${ws.id}}! (${new Date().toGMTString()})`);
+  console.log(`${ws.username} has disconnected from ${ws.roomId}! (${new Date().toGMTString()})`);
 
   const room = rooms[ws.roomId];
   if (room) {
