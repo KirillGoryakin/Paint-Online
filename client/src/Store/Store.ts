@@ -105,7 +105,7 @@ class Store {
     };
 
     if (
-      process.env.REACT_APP_DO_RECONNECT
+      process.env.REACT_APP_DO_RECONNECT === 'true'
       && process.env.REACT_APP_RECONNECT_TIMEOUT
     ){
       setTimeout(
