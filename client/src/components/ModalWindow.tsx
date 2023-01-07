@@ -12,17 +12,21 @@ import {
 } from '@chakra-ui/react';
 import { useParams } from 'react-router';
 import Store from 'Store/Store';
+import { Spinner } from './Spinner';
 
 const ModalWindow = () => {
   const [open, setOpen] = useState(true);
   const [username, setUsername] = useState('');
   const [isNameTaken, setIsNameTaken] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState(false);
   const { roomId } = useParams();
   
   const handleEnter = async () => {
     if (roomId && username.trim()){
       try {
+        setIsLoading(true);
+        
         const isTaken = await Store.isUsernameTaken(roomId, username);
         setIsNameTaken(isTaken);
 
@@ -32,6 +36,7 @@ const ModalWindow = () => {
         }
       } catch(e) {
         setServerError(true);
+        setIsLoading(false);
       }
     }
   };
@@ -43,6 +48,12 @@ const ModalWindow = () => {
         <ModalContent>
           <ModalHeader>Enter your username</ModalHeader>
           <ModalBody>
+            {isLoading && <Spinner style={{
+                display: 'block',
+                margin: '0 auto 24px',
+                width: 100,
+                height: 100,
+              }} />}
             <Text
               display={isNameTaken ? 'block' : 'none'}
               color='crimson'
@@ -55,13 +66,19 @@ const ModalWindow = () => {
               onChange={e => setUsername(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleEnter()}
               placeholder='Username...'
+              disabled={isLoading}
               focusBorderColor={isNameTaken ? 'crimson' : 'blue.500'}
               borderColor={isNameTaken ? 'crimson' : 'blue.500'}
             />
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme='blue' mr={3} onClick={handleEnter}>
+            <Button
+              colorScheme='blue'
+              disabled={isLoading}
+              mr={3}
+              onClick={handleEnter}
+            >
               Enter
             </Button>
           </ModalFooter>

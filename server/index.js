@@ -84,7 +84,7 @@ const handleConnection = (ws, msg) => {
   ws.username = msg.username;
 
   const room = rooms[msg.roomId];
-  if (room) {
+  if (room && !room.users.includes(msg.username)) {
     room.users.push(msg.username);
     sendToAllUsersInRoom(msg.roomId, { ...msg, users: room.users });
     sendToUser(msg.roomId, msg.username, { method: 'init', figures: room.figures });
