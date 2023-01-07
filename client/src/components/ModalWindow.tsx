@@ -30,8 +30,11 @@ const ModalWindow = () => {
         const isTaken = await Store.isUsernameTaken(roomId, username);
         setIsNameTaken(isTaken);
 
+        if (isTaken) setIsLoading(false);
+
         if (!isTaken) {
           await Store.setWebsocketConnection(roomId, username.trim());
+          setIsLoading(false);
           setOpen(false);
         }
       } catch(e) {
