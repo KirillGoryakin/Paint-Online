@@ -9,27 +9,38 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 5000;
 
-let rooms = []; //[{ id: number, users: string[], figures: Figure[] }, ...]
+/*
+  type Rooms = {
+    [roomId: string]: {
+      roomId: string;
+      users: string[];
+      figures: Figure[];
+    }
+  };
+*/
+// let rooms = {};
+let rooms = {};
 
-app.ws('/', (ws, req) => {
+app.ws('/', (ws) => {
   ws.on('message', (msg) => {
     msg = JSON.parse(msg);
 
     switch (msg.method) {
       case 'connection': handleConnection(ws, msg); break;
-      case 'disconnection': handleDisconnection(ws, msg); break;
-      case 'figure': handleFigure(ws, msg); break;
-      case 'undo': handleUndo(ws, msg); break;
+      case 'figure': handleFigure(msg); break;
+      case 'undo': handleUndo(msg); break;
     }
   });
+
+  ws.on('close', () => handleDisconnection(ws));
 });
 
 app.get('/room/:roomId', (req, res) => {
   const { roomId } = req.params;
-  const response = { id: roomId, users: [] };
+  const response = { roomId, users: [] };
 
   if (roomId) {
-    const room = rooms.find(({ id }) => id === roomId);
+    const room = rooms[roomId];
     if (room) {
       return res.json({...response, users: room.users});
     }
@@ -40,73 +51,87 @@ app.get('/room/:roomId', (req, res) => {
 
 app.listen(PORT, () => console.log(`Server started on port: ${PORT}.`));
 
-const sendToUser = (id, username, msg) => {
-  msg = { ...msg, id, username };
+const logRooms = () => {
+  let toLog = {};
+  for( const roomId in rooms ){
+    toLog[roomId] = rooms[roomId].users;
+  }
+  console.log('Rooms: ', toLog);
+};
+
+const sendToUser = (roomId, username, msg) => {
+  msg = { ...msg, roomId, username };
   
   aWss.clients.forEach(client => {
-    if (client.id === id & client.username === username) {
+    if (client.roomId === roomId & client.username === username) {
       client.send(JSON.stringify(msg));
     }
   });
 };
 
-const sendToAllUsersInRoom = (msg) => {
+const sendToAllUsersInRoom = (roomId, msg) => {
   aWss.clients.forEach(client => {
-    if (client.id === msg.id) {
+    if (client.roomId === roomId) {
       client.send(JSON.stringify(msg));
     }
   });
 };
 
 const handleConnection = (ws, msg) => {
-  console.log(`${msg.username} has connected to {${msg.id}}! (${new Date().toGMTString()})`);
+  console.log(`${msg.username} has connected to {${msg.roomId}}! (${new Date().toGMTString()})`);
 
-  ws.id = msg.id;
+  ws.roomId = msg.roomId;
   ws.username = msg.username;
 
-  const room = rooms.find(room => room.id === msg.id);
+  const room = rooms[msg.roomId];
   if (room) {
     room.users.push(msg.username);
-    sendToAllUsersInRoom({ ...msg, users: room.users });
-    sendToUser(msg.id, msg.username, { method: 'init', figures: room.figures });
+    sendToAllUsersInRoom(msg.roomId, { ...msg, users: room.users });
+    sendToUser(msg.roomId, msg.username, { method: 'init', figures: room.figures });
   } else {
-    const newRoom = {
-      id: msg.id,
+    rooms[msg.roomId] = {
+      roomId: msg.roomId,
       figures: [],
       users: [msg.username]
     };
-    rooms.push(newRoom);
-    sendToAllUsersInRoom({ ...msg, users: newRoom.users });
+    sendToAllUsersInRoom(msg.roomId, { ...msg, users: [msg.username] });
   }
+
+  logRooms();
 };
 
-const handleDisconnection = (ws, msg) => {
-  console.log(`${msg.username} has disconnected from {${msg.id}}! (${new Date().toGMTString()})`);
+const handleDisconnection = (ws) => {
+  console.log(`${ws.username} has disconnected from {${ws.id}}! (${new Date().toGMTString()})`);
 
-  const room = rooms.find(({ id }) => id === msg.id);
-  if(room){
+  const room = rooms[ws.roomId];
+  if (room) {
     if (room.users.length > 1) {
-      room.users = room.users.filter(user => user !== msg.username);
-      sendToAllUsersInRoom({ ...msg, users: room.users });
+      room.users = room.users.filter(user => user !== ws.username);
+      sendToAllUsersInRoom(ws.roomId, {
+        method: 'disconnection',
+        users: room.users
+      });
     } else {
-      rooms = rooms.filter(({ id }) => id !== room.id);
+      delete rooms[ws.roomId];
     }
   }
+
+  logRooms();
 };
 
-const handleFigure = (ws, msg) => {
-  const room = rooms.find(({ id }) => id === msg.id);
+const handleFigure = (msg) => {
+  const room = rooms[msg.roomId];
   if (room){
     if (!msg.figure.pending)
       room.figures.push(msg.figure);
 
-    sendToAllUsersInRoom(msg);
+    sendToAllUsersInRoom(msg.roomId, msg);
   }
 };
 
-const handleUndo = (ws, msg) => {
-  const room = rooms.find(({ id }) => id === msg.id);
+const handleUndo = (msg) => {
+  const room = rooms[msg.roomId];
   if (room) room.figures.pop();
 
-  sendToAllUsersInRoom(msg);
+  sendToAllUsersInRoom(msg.roomId, msg);
 };

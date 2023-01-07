@@ -7,15 +7,15 @@ import { RoomCode } from "./RoomCode";
 import { TopBar } from "./TopBar";
 import { Users } from "./Users";
 
-const isRoomId = (id: string): boolean => /^\d{5}$/.test(id);
+const isRoomId = (roomId: string): boolean => /^\d{5}$/.test(roomId);
 
 type Props = {
   genRoomId: () => number;
 };
 
 const Layout: React.FC<Props> = ({ genRoomId }) => {
-  const { id } = useParams();
-  if (id && !isRoomId(id))
+  const { roomId } = useParams();
+  if (roomId && !isRoomId(roomId))
     return <Navigate to={'/' + genRoomId()} />
   
   return (

@@ -18,16 +18,16 @@ const ModalWindow = () => {
   const [username, setUsername] = useState('');
   const [isNameTaken, setIsNameTaken] = useState(false);
   const [serverError, setServerError] = useState(false);
-  const { id } = useParams();
+  const { roomId } = useParams();
   
   const handleEnter = async () => {
-    if(id && username.trim()){
+    if (roomId && username.trim()){
       try {
-        const isTaken = await Store.isUsernameTaken(id, username);
+        const isTaken = await Store.isUsernameTaken(roomId, username);
         setIsNameTaken(isTaken);
 
         if (!isTaken) {
-          await Store.setWebsocketConnection(id, username.trim());
+          await Store.setWebsocketConnection(roomId, username.trim());
           setOpen(false);
         }
       } catch(e) {

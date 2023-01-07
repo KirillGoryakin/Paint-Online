@@ -18,7 +18,7 @@ class Store {
   color: string = '#000000';
   clickable: boolean = true;
 
-  id: string = '';
+  roomId: string = '';
   username: string = '';
   socket: WebSocket | null = null;
   users: string[] = [];
@@ -51,20 +51,17 @@ class Store {
     this.setTool(Brush);
   }
 
-  setWebsocketConnection(id: string, username: string) {
+  setWebsocketConnection(roomId: string, username: string) {
     const socket = new WebSocket(`${process.env.REACT_APP_WS_URL}/`);
 
     this.socket = socket;
-    this.id = id;
+    this.roomId = roomId;
     this.username = username;
 
-    const msg = { id, username };
+    const msg = { roomId, username };
 
     socket.onopen = () => 
       socket.send(JSON.stringify({ ...msg, method: 'connection' }));
-    
-    window.onbeforeunload = () => 
-      socket.send(JSON.stringify({ ...msg, method: 'disconnection' }));
 
     socket.onmessage = ({ data: msg }) => {
       msg = JSON.parse(msg);
@@ -108,8 +105,8 @@ class Store {
     };
   }
 
-  async isUsernameTaken(id: string, username: string) {
-    const res = await fetch(`${process.env.REACT_APP_HTTP_URL}/room/${id}`);
+  async isUsernameTaken(roomId: string, username: string) {
+    const res = await fetch(`${process.env.REACT_APP_HTTP_URL}/room/${roomId}`);
     const data = await res.json();
     if(data.users.includes(username))
       return true;
@@ -120,7 +117,7 @@ class Store {
   sendMessage(msg: object) {
     if (this.socket) {
       msg = {
-        id: this.id,
+        roomId: this.roomId,
         username: this.username,
         ...msg,
       };
