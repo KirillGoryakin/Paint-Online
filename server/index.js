@@ -14,11 +14,11 @@ const PORT = process.env.PORT || 5000;
     [roomId: string]: {
       roomId: string;
       users: string[];
-      figures: Figure[];
+      figures: Array<Figure & {username: string; id: string;}>;
+      pending: {[username: string]: Figure};
     }
   };
 */
-// let rooms = {};
 let rooms = {};
 
 app.ws('/', (ws) => {
@@ -29,6 +29,7 @@ app.ws('/', (ws) => {
       case 'connection': handleConnection(ws, msg); break;
       case 'figure': handleFigure(msg); break;
       case 'undo': handleUndo(msg); break;
+      case 'redo': handleRedo(msg); break;
     }
   });
 
@@ -87,11 +88,16 @@ const handleConnection = (ws, msg) => {
   if (room && !room.users.includes(msg.username)) {
     room.users.push(msg.username);
     sendToAllUsersInRoom(msg.roomId, { ...msg, users: room.users });
-    sendToUser(msg.roomId, msg.username, { method: 'init', figures: room.figures });
+    sendToUser(msg.roomId, msg.username, {
+      method: 'init',
+      figures: room.figures,
+      pending: room.pending
+    });
   } else {
     rooms[msg.roomId] = {
       roomId: msg.roomId,
       figures: [],
+      pending: [],
       users: [msg.username]
     };
     sendToAllUsersInRoom(msg.roomId, { ...msg, users: [msg.username] });
@@ -122,8 +128,13 @@ const handleDisconnection = (ws) => {
 const handleFigure = (msg) => {
   const room = rooms[msg.roomId];
   if (room){
-    if (!msg.figure.pending)
+    if (msg.figure.pending){
+      room.pending[msg.username] = msg.figure;
+    }
+    else {
       room.figures.push(msg.figure);
+      delete room.pending[msg.username];
+    }
 
     sendToAllUsersInRoom(msg.roomId, msg);
   }
@@ -131,7 +142,17 @@ const handleFigure = (msg) => {
 
 const handleUndo = (msg) => {
   const room = rooms[msg.roomId];
-  if (room) room.figures.pop();
+  if (room){
+    room.figures = room.figures.filter(
+      f => f.id !== msg.id || f.username !== msg.username);
+      
+    sendToAllUsersInRoom(msg.roomId, msg);
+  }
+};
+
+const handleRedo = (msg) => {
+  const room = rooms[msg.roomId];
+  if (room) room.figures.push(msg.figure);
 
   sendToAllUsersInRoom(msg.roomId, msg);
 };

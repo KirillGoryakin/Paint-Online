@@ -11,18 +11,21 @@ import Tool from "Tools/Tool";
 class Store {
   canvas: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
+
   tool: Tool | null = null;
-  undoList: Figure[] = [];
-  redoList: Figure[] = [];
   lineWidth: number = 8;
   color: string = '#000000';
   clickable: boolean = true;
+
+  undoList: Array<Figure & {id: number}> = [];
+  redoList: Array<Figure & {id: number}> = [];
+  figures: Array<Figure & {username: string; id: number}> = [];
+  pending: { [username: string]: Figure } = {};
 
   roomId: string = '';
   username: string = '';
   socket: WebSocket | null = null;
   users: string[] = [];
-  isPending: boolean = false;
   
   constructor() {
     makeAutoObservable(this);
@@ -31,7 +34,7 @@ class Store {
     this.drawFigure = this.drawFigure.bind(this);
     this.undo = this.undo.bind(this);
     this.redo = this.redo.bind(this);
-    this.pushFigureToUndo = this.pushFigureToUndo.bind(this);
+    this.pushFigure = this.pushFigure.bind(this);
   }
 
   setCanvas(canvas: HTMLCanvasElement) {
@@ -73,28 +76,36 @@ class Store {
           break;
 
         case 'init':
-          msg.figures.forEach((figure: Figure) => {
-            this.pushFigureToUndo(figure);
-            this.drawFigure(figure);
-          });
+          this.figures = msg.figures;
+          this.pending = msg.pending;
+          this.updateCanvas();
           break;
 
         case 'figure':
           if (msg.username !== this.username){
             if (msg.figure.pending){
-              this.setPending(true);
+              this.pending[msg.username] = msg.figure;
             } else {
-              this.pushFigureToUndo(msg.figure);
-              this.setPending(false);
+              this.figures.push(msg.figure);
+              delete this.pending[msg.username];
             }
-
+            
             this.drawFigure(msg.figure);
           }
           break;
 
         case 'undo':
           if (msg.username !== this.username) {
-            this.undo(false);
+            this.figures = this.figures.filter(
+              f => f.id !== msg.id || f.username !== msg.username);
+            this.updateCanvas();
+          }
+          break;
+
+        case 'redo':
+          if (msg.username !== this.username) {
+            this.figures.push(msg.figure);
+            this.updateCanvas();
           }
           break;
 
@@ -138,15 +149,26 @@ class Store {
     }
   }
 
-  sendFigure(figure: Figure) {
+  sendFigure(figure: Figure, id: number) {
     this.sendMessage({
       method: 'figure',
-      figure,
+      figure: {
+        ...figure,
+        username: this.username,
+        id
+      },
     });
   }
 
-  sendUndo(){
-    this.sendMessage({ method: 'undo' });
+  sendUndo(id: number){
+    this.sendMessage({ method: 'undo', username: this.username, id });
+  }
+
+  sendRedo(figure: Figure & { id: number }) {
+    this.sendMessage({
+      method: 'redo',
+      figure: {...figure, username: this.username}
+    });
   }
 
   setTool(tool: typeof Tool){
@@ -183,16 +205,6 @@ class Store {
   setUsers(users: string[]) {
     this.users = users;
   }
-
-  setPending(value: boolean) {
-    if (this.isPending && !value)
-      this.updateCanvas();
-
-    if (!this.isPending && value)
-      this.ctx?.beginPath();
-
-    this.isPending = value;
-  }
   
   clearCanvas() {
     if (this.canvas && this.ctx) {
@@ -207,8 +219,10 @@ class Store {
       };
 
       Clear.drawFigure(ctx, figure);
-      this.pushFigureToUndo(figure);
-      this.sendFigure(figure);
+
+      const id = new Date().getTime();
+      this.pushFigure(figure, id);
+      this.sendFigure(figure, id);
     }
   }
 
@@ -261,7 +275,7 @@ class Store {
       const ctx = this.ctx;
       const tool = this.getToolFromFigure(figure);
 
-      if (!figure.pending) ctx.beginPath();
+      ctx.beginPath();
       if (tool) tool.drawFigure(ctx, figure);
     }
   }
@@ -272,43 +286,42 @@ class Store {
       const ctx = this.ctx;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      this.undoList.forEach(this.drawFigure);
+      this.figures.forEach(this.drawFigure);
+      Object.values(this.pending).forEach(this.drawFigure);
     }
   }
 
-  undo(doSend: boolean = true) {
-    if (this.canvas && this.ctx) {
-      const canvas = this.canvas;
-      const ctx = this.ctx;
-      
-      if (this.undoList.length) {
-        const figure = this.undoList.pop();
-        if (figure) {
-          this.redoList.push(figure);
+  undo() {
+    if (this.undoList.length) {
+      const figure = this.undoList.pop();
+      if (figure) {
+        this.redoList.push(figure);
+        this.figures = this.figures.filter(
+          f => f.id !== figure.id || f.username !== this.username);
 
-          this.updateCanvas();
-        }
-      } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.updateCanvas();
+        this.sendUndo(figure.id);
       }
-
-      if(doSend) this.sendUndo();
     }
   }
 
   redo() {
-    if (this.canvas && this.ctx && this.redoList.length) {
+    if (this.redoList.length) {
       const figure = this.redoList.pop();
       if (figure) {
         this.undoList.push(figure);
-        this.drawFigure(figure);
-        this.sendFigure(figure);
+        this.figures.push({ ...figure, username: this.username })
+        
+        this.updateCanvas();
+        this.sendRedo(figure);
       }
     }
   }
 
-  pushFigureToUndo(figure: Figure){
-    this.undoList.push(figure);
+  pushFigure(figure: Figure, id: number){
+    const username = this.username;
+    this.undoList.push({ ...figure, id });
+    this.figures.push({ ...figure, username, id });
     this.redoList = [];
   }
 }

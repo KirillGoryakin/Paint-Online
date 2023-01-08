@@ -3,7 +3,7 @@ import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Circle extends Tool {
-  figureToUndo: Figure & { tool: 'circle' } = {
+  finishedFigure: Figure & { tool: 'circle' } = {
     tool: 'circle',
     color: '',
     lineWidth: 0,
@@ -21,8 +21,8 @@ class Circle extends Tool {
     const [x, y] = this.getCoords(e);
     this.save = this.canvas.toDataURL();
 
-    this.figureToUndo = {
-      ...this.figureToUndo,
+    this.finishedFigure = {
+      ...this.finishedFigure,
       startX: x,
       startY: y,
     };
@@ -34,8 +34,8 @@ class Circle extends Tool {
     if (this.isMouseDown) {
       const [x, y] = this.getCoords(e);
 
-      this.figureToUndo = {
-        ...this.figureToUndo,
+      this.finishedFigure = {
+        ...this.finishedFigure,
         endX: x,
         endY: y,
       };
@@ -46,7 +46,7 @@ class Circle extends Tool {
 
   draw(x: number, y: number) {
     const figure: Figure & { tool: 'circle' } = {
-      ...this.figureToUndo,
+      ...this.finishedFigure,
       endX: x,
       endY: y,
     };

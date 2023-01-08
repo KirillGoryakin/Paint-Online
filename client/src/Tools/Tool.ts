@@ -6,7 +6,7 @@ class Tool {
   ctx: CanvasRenderingContext2D;
   isMouseDown: boolean = false;
 
-  figureToUndo: Figure | null = null;
+  finishedFigure: Figure | null = null;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -27,9 +27,9 @@ class Tool {
   onMouseDown(e: PointerEvent) {
     this.isMouseDown = true;
     
-    if (this.figureToUndo){
-      this.figureToUndo.color = Store.color;
-      this.figureToUndo.lineWidth = Store.lineWidth;
+    if (this.finishedFigure){
+      this.finishedFigure.color = Store.color;
+      this.finishedFigure.lineWidth = Store.lineWidth;
     }
 
     this.ctx.beginPath();
@@ -40,9 +40,10 @@ class Tool {
   }
   
   onMouseUp(e: MouseEvent) {
-    if (this.isMouseDown && this.figureToUndo){
-      Store.sendFigure(this.figureToUndo);
-      Store.pushFigureToUndo(this.figureToUndo);
+    if (this.isMouseDown && this.finishedFigure){
+      const id = new Date().getTime();
+      Store.sendFigure(this.finishedFigure, id);
+      Store.pushFigure(this.finishedFigure, id);
     }
 
     this.isMouseDown = false;

@@ -3,7 +3,7 @@ import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Rect extends Tool {
-  figureToUndo: Figure & { tool: 'rect' } = {
+  finishedFigure: Figure & { tool: 'rect' } = {
     tool: 'rect',
     color: '',
     lineWidth: 0,
@@ -21,8 +21,8 @@ class Rect extends Tool {
     const [x, y] = this.getCoords(e);
     this.save = this.canvas.toDataURL();
 
-    this.figureToUndo = {
-      ...this.figureToUndo,
+    this.finishedFigure = {
+      ...this.finishedFigure,
       startX: x,
       startY: y,
     };
@@ -34,8 +34,8 @@ class Rect extends Tool {
     if (this.isMouseDown) {
       const [x, y] = this.getCoords(e);
 
-      this.figureToUndo = {
-        ...this.figureToUndo,
+      this.finishedFigure = {
+        ...this.finishedFigure,
         endX: x,
         endY: y,
       };
@@ -46,7 +46,7 @@ class Rect extends Tool {
 
   draw(x: number, y: number) {
     const figure: Figure & { tool: 'rect' } = {
-      ...this.figureToUndo,
+      ...this.finishedFigure,
       endX: x,
       endY: y,
     };

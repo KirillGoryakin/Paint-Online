@@ -3,7 +3,7 @@ import Store from "Store/Store";
 import Tool from "./Tool";
 
 class Eraser extends Tool {
-  figureToUndo: Figure & { tool: 'eraser' } = {
+  finishedFigure: Figure & { tool: 'eraser' } = {
     tool: 'eraser',
     color: '',
     lineWidth: 0,
@@ -12,7 +12,7 @@ class Eraser extends Tool {
 
   onMouseDown(e: PointerEvent) {
     super.onMouseDown(e);
-    this.figureToUndo.coords = [];
+    this.finishedFigure.coords = [];
   }
 
   onMouseMove(e: PointerEvent) {
@@ -22,19 +22,15 @@ class Eraser extends Tool {
       const [x, y] = this.getCoords(e);
       const pressure = e.pointerType === 'mouse' ? undefined : e.pressure + 0.5;
       
-      this.figureToUndo.coords.push({ x, y, pressure });
+      this.finishedFigure.coords.push({ x, y, pressure });
       this.draw(x, y, pressure);
     }
   }
 
   draw(x: number, y: number, pressure?: number){
-    const figure: Figure & { tool: 'eraser' } = {
-      ...this.figureToUndo,
-      coords: [{ x, y, pressure }],
-    };
-
-    Eraser.drawFigure(this.ctx, figure);
-    Store.sendFigure({ ...figure, pending: true });
+    this.ctx.beginPath();
+    Eraser.drawFigure(this.ctx, this.finishedFigure);
+    Store.sendFigure({ ...this.finishedFigure, pending: true }, new Date().getTime());
   }
 
   static drawFigure(
