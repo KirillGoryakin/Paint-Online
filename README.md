@@ -24,6 +24,12 @@ https://paint-online-kirillgoryakin.vercel.app/
 
 Used [Vercel.com](https://vercel.com/) for hosting frontend and [Render.com](https://render.com/) for backend.
 
+If your backend hosting closes websocket connection ([Render.com](https://render.com/) closes it after 5 min), you have to regularly reconnect to the server. This project has such feature implemented. You can activate and set reconnection timeout by providing these ENV variables to your **frontend**:
+```
+REACT_APP_DO_RECONNECT=true
+REACT_APP_RECONNECT_TIMEOUT=240000
+```
+*240 000 ms = 4 min. You can set your own timeout.*
 # Development
 ### Instalation:
 Clone repository:
