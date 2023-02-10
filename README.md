@@ -30,7 +30,7 @@ REACT_APP_DO_RECONNECT=true
 REACT_APP_RECONNECT_TIMEOUT=240000
 ```
 *240 000 ms = 4 min. You can set your own timeout.*
-# Development
+# 💻 Development
 ### Instalation:
 Clone repository:
 ```
@@ -58,4 +58,29 @@ npm run client
 ### Start only server:
 ```
 npm run server
+```
+
+# 🐳 Docker
+### Build image (client)
+```
+cd client
+```
+```
+docker build . -t paint-online:client
+```
+### Run container (client)
+```
+docker run -d --rm -p 3000:3000 --name paint-online-client paint-online:client
+```
+
+### Build image (server)
+```
+cd server
+```
+```
+docker build . -t paint-online:server
+```
+### Run container (server)
+```
+docker run -d --rm -p 5000:5000 --name paint-online-server paint-online:server
 ```
