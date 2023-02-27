@@ -41,6 +41,7 @@ const ModalWindow = () => {
 
         if (isTaken) {
           setIsLoading(false)
+          clearTimeout(firstLoadTimeout);
           setMessage({ text: 'This username is already taken. Pick another one.', color: 'crimson' });
         };
 
