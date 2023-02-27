@@ -14,10 +14,16 @@ import { useParams } from 'react-router';
 import Store from 'Store/Store';
 import { Spinner } from './Spinner';
 
+type Message = {
+  text: string;
+  color?: string;
+};
+
 const ModalWindow = () => {
   const [open, setOpen] = useState(true);
   const [username, setUsername] = useState('');
   const [isNameTaken, setIsNameTaken] = useState(false);
+  const [message, setMessage] = useState<Message>({ text: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState(false);
   const { roomId } = useParams();
@@ -26,14 +32,21 @@ const ModalWindow = () => {
     if (roomId && username.trim()){
       try {
         setIsLoading(true);
+        const firstLoadTimeout = setTimeout(() => {
+          setMessage({ text: 'First load might take up to 1 minute due to Render.com free plan terms.' });
+        }, 5000);
         
         const isTaken = await Store.isUsernameTaken(roomId, username);
         setIsNameTaken(isTaken);
 
-        if (isTaken) setIsLoading(false);
+        if (isTaken) {
+          setIsLoading(false)
+          setMessage({ text: 'This username is already taken. Pick another one.', color: 'crimson' });
+        };
 
         if (!isTaken) {
           await Store.setWebsocketConnection(roomId, username.trim());
+          clearTimeout(firstLoadTimeout);
           setIsLoading(false);
           setOpen(false);
         }
@@ -58,11 +71,12 @@ const ModalWindow = () => {
                 height: 100,
               }} />}
             <Text
-              display={isNameTaken ? 'block' : 'none'}
-              color='crimson'
+              display={message.text ? 'block' : 'none'}
+              color={message.color || 'black'}
+              fontWeight={600}
               mb={4}
             >
-              This username is already taken. Pick another one.
+              {message.text}
             </Text>
             <Input
               value={username}
